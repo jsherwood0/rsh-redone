@@ -39,6 +39,7 @@
 static char *argv0;
 
 static void usage(void) {
+	fprintf(stderr, "PA Custom rsh. 2025-04-10\n");
 	fprintf(stderr, "Usage: %s [-46vn] [-l user] [-p port] [user@]host command...\n", argv0);
 }
 
@@ -336,8 +337,12 @@ done:
 	
 	errno = 0;
 	
-	if(read(sock, buf[0], 1) != 1 || *buf[0]) {
-		fprintf(stderr, "%s: Didn't receive NULL byte from server: %s\n", argv0, strerror(errno));
+	int rtn = read(sock, buf[0], 1);
+	if(errno != 0) {
+		fprintf(stderr, "%s: Received an error from server: %s\n", argv0, strerror(errno));
+		return 1;
+	}else if(rtn != 1 || *buf[0]) {
+		fprintf(stderr, "%s: Didn't receive NULL byte from server. Connection failed.\n", argv0);
 		return 1;
 	}
 
